@@ -1,1 +1,2 @@
-work in progress
+WIP
+Uses an L-system and voronoi generation
