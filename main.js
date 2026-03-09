@@ -60,11 +60,11 @@ const box = new THREE.Mesh(
 box.position.set(0, S / 2, 0);
 scene.add(box);
 
-const { lines, dots, edges } = buildLattice(S);
+const { lines, dots, edges, lineGeo } = buildLattice(S);
 scene.add(lines);
 scene.add(dots);
 
-const { update: updateRoots } = createRootSystems(scene, S, edges);
+const { update: updateRoots } = createRootSystems(scene, S, edges, lineGeo);
 
 window.addEventListener('resize', () => {
   const w = window.innerWidth;

@@ -133,6 +133,10 @@ export function buildLattice(S) {
     const ci = (1 - (pi.x + pi.y + pi.z - DEPTH_MIN) / DEPTH_RANGE) * 0.72;
     const cj = (1 - (pj.x + pj.y + pj.z - DEPTH_MIN) / DEPTH_RANGE) * 0.72;
     colArray.set([ci, ci, ci, cj, cj, cj], off);
+    edge.flash        = 0;
+    edge.baseColStart = ci;
+    edge.baseColEnd   = cj;
+    edge.idx          = idx;
   });
 
   const lineGeo = new THREE.BufferGeometry();
@@ -143,6 +147,7 @@ export function buildLattice(S) {
     lines: new THREE.LineSegments(lineGeo, new THREE.LineBasicMaterial({ vertexColors: true })),
     dots:  new THREE.Group(),
     pts,
-    edges: accepted  // { start, end, rootCount, maxRoots, … }
+    edges: accepted,
+    lineGeo
   };
 }
