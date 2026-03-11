@@ -36,35 +36,54 @@ const camera = new THREE.OrthographicCamera(
 camera.position.set(15, 15 + S / 2, 15);
 camera.lookAt(0, S / 2, 0);
 
-// DEBUG: orbit controls — remove when done
 const controls = new OrbitControls(camera, renderer.domElement);
 controls.target.set(0, S / 2, 0);
+controls.autoRotate      = true;
+controls.autoRotateSpeed = 0.6;   // degrees per frame; negative = reverse
 controls.update();
+
+// Stop auto-rotation permanently on any mouse interaction (resets on page refresh)
+renderer.domElement.addEventListener('mousedown', () => { controls.autoRotate = false; }, { once: true });
 
 scene.add(new THREE.AmbientLight(0xffffff, 0.6));
 const dirLight = new THREE.DirectionalLight(0xffffff, 1.2);
 dirLight.position.set(10, 20, 10);
 scene.add(dirLight);
 
-const ground = new THREE.Mesh(
-  new THREE.PlaneGeometry(S, S),
-  new THREE.MeshLambertMaterial({ color: 0xbdbdbd, transparent: true, opacity: 0.10, side: THREE.DoubleSide })
-);
-ground.rotation.x = -Math.PI / 2;
-scene.add(ground);
-
 const box = new THREE.Mesh(
   new THREE.BoxGeometry(S, S, S),
-  new THREE.MeshLambertMaterial({ color: 0x9e9e9e, transparent: true, opacity: 0.10 })
+  new THREE.ShaderMaterial({
+    transparent: true,
+    depthWrite:  false,
+    side:        THREE.DoubleSide,
+    vertexShader: `
+      varying vec3 vNormalView;
+      void main() {
+        vNormalView = normalize(normalMatrix * normal);
+        gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+      }
+    `,
+    fragmentShader: `
+      varying vec3 vNormalView;
+      void main() {
+        // Ortho camera: view dir in view-space is always (0,0,1)
+        float cosA    = abs(vNormalView.z);
+        float fresnel = 1.0 - cosA;
+        float opacity = 0.02 + 0.28 * pow(fresnel, 2.75);
+        gl_FragColor  = vec4(0.35, 0.45, 0.75, opacity);
+      }
+    `
+  }) //.45,.45,.45 is grey
 );
 box.position.set(0, S / 2, 0);
 scene.add(box);
 
-const { lines, dots, edges, lineGeo } = buildLattice(S);
+const { lines, lineMaterial, flashLines, flashLineMaterial, dots, edges, lineGeo, flashLineGeo } = buildLattice(S);
 scene.add(lines);
 scene.add(dots);
+scene.add(flashLines);
 
-const { update: updateRoots } = createRootSystems(scene, S, edges, lineGeo);
+const { update: updateRoots } = createRootSystems(scene, S, edges, lineGeo, flashLineGeo);
 
 window.addEventListener('resize', () => {
   const w = window.innerWidth;
@@ -77,6 +96,8 @@ window.addEventListener('resize', () => {
   camera.bottom = -frustumSize / 2;
   camera.updateProjectionMatrix();
   renderer.setSize(w, h);
+  lineMaterial.resolution.set(w, h);
+  flashLineMaterial.resolution.set(w, h);
 });
 
 function animate() {

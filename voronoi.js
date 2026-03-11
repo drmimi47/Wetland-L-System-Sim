@@ -1,4 +1,7 @@
 import * as THREE from 'three';
+import { LineSegments2 } from 'three/addons/lines/LineSegments2.js';
+import { LineSegmentsGeometry } from 'three/addons/lines/LineSegmentsGeometry.js';
+import { LineMaterial } from 'three/addons/lines/LineMaterial.js';
 
 const NX = 3;
 const NY = 3;
@@ -139,15 +142,39 @@ export function buildLattice(S) {
     edge.idx          = idx;
   });
 
-  const lineGeo = new THREE.BufferGeometry();
-  lineGeo.setAttribute('position', new THREE.BufferAttribute(posArray, 3));
-  lineGeo.setAttribute('color',    new THREE.BufferAttribute(colArray, 3));
+  const lineGeo = new LineSegmentsGeometry();
+  lineGeo.setPositions(posArray);
+  lineGeo.setColors(colArray);
+
+  const lineMat = new LineMaterial({
+    vertexColors: true,
+    linewidth: 1.2,
+    resolution: new THREE.Vector2(window.innerWidth, window.innerHeight)
+  });
+
+  // Flash overlay: pre-allocated at full capacity; instanceCount controls how many are drawn
+  const flashPosArray = new Float32Array(accepted.length * 6);
+  const flashColArray = new Float32Array(accepted.length * 6);
+  const flashLineGeo = new LineSegmentsGeometry();
+  flashLineGeo.setPositions(flashPosArray);
+  flashLineGeo.setColors(flashColArray);
+  flashLineGeo.instanceCount = 0;
+
+  const flashLineMat = new LineMaterial({
+    vertexColors: true,
+    linewidth: 2.1,
+    resolution: new THREE.Vector2(window.innerWidth, window.innerHeight)
+  });
 
   return {
-    lines: new THREE.LineSegments(lineGeo, new THREE.LineBasicMaterial({ vertexColors: true })),
+    lines: new LineSegments2(lineGeo, lineMat),
+    lineMaterial: lineMat,
+    flashLines: new LineSegments2(flashLineGeo, flashLineMat),
+    flashLineMaterial: flashLineMat,
     dots:  new THREE.Group(),
     pts,
     edges: accepted,
-    lineGeo
+    lineGeo,
+    flashLineGeo
   };
 }
