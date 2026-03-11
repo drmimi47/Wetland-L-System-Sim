@@ -7,4 +7,4 @@ Click space bar to display biofilm accumulation. <br>
 LMB to rotate camera. <br>
 RMB to pan camera. <br>
 
-<img src="screenshot.png" width="600">
+<img src="image.png" width="600">
