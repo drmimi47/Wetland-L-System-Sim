@@ -3,8 +3,8 @@ visualizes the submerged growth of floating wetland plant roots through an L-sys
 
 ### MINIMAL CONTROLS
 
-Click space bar to display biofilm accumulation.
-LMB to rotate camera.
-RMB to pan camera.
+Click space bar to display biofilm accumulation. <br>
+LMB to rotate camera. <br>
+RMB to pan camera. <br>
 
 <img src="screenshot.png" width="600">
